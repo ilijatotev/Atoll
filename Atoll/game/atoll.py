@@ -132,7 +132,7 @@ class Atoll:
         is_over, color = self.is_game_over()
         if is_over:
             self.game_over = True
-            self.winner = "White" if color == CellState.WHITE else "Black"
+            self.winner = "White" if color == Player.WHITE else "Black"
             print(f"Game over, winner is {self.winner}")
             return True
         
@@ -146,7 +146,7 @@ class Atoll:
     def draw_last_move(self,screen):
         if self.last_move!=None:
             alphabetic_coordinate, numeric_coordinate = self.last_move
-            last_move = "Last move: black" if self.current_player == Player.WHITE else "Last move: white"
+            last_move = "Last move: black" if self.board_logic.get(self.last_move) == CellState.BLACK else "Last move: white"
             last_move = last_move + " (" + alphabetic_coordinate +", " + str(numeric_coordinate) + ")"
 
             font = pygame.font.Font(None, 28)
@@ -214,11 +214,12 @@ class Atoll:
 
 #metoda koja proverava da li je kraj igre, za igraca koji je upravo odigrao potez
     def is_game_over(self):
-        islands = self.black_islands if self.current_player == CellState.BLACK else self.white_islands
+        color = CellState.BLACK if self.current_player == Player.BLACK else CellState.WHITE
+        islands = self.black_islands if self.current_player == Player.BLACK else self.white_islands
 
         for i in range(len(islands)):
             for j in range(i+1, len(islands)):
-                if self._has_path(islands[i], islands[j], self.current_player):
+                if self._has_path(islands[i], islands[j], color):
                     if (self.get_distances(islands[i], islands[j]) >= self.get_winning_treshold()):
                         return True, self.current_player
         return False, None
