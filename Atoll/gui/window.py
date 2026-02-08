@@ -2,14 +2,15 @@ import pygame
 from game.board import Board
 from game.atoll import Atoll
 from common import *
+from game.enums import GameMode
 
 def run_game(config):
     board_size = config["board_size"]
-    game_mode = config["game_mode"] == "AI"
+    game_mode = config["game_mode"]
     first_player = config["first_player"]
+    computer_color = config["computer_color"]
     
-    print(board_size, game_mode, first_player)
-    game = Atoll(board_size, first_player, game_mode)
+    game = Atoll(board_size, first_player, game_mode, computer_color)
 
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
@@ -19,6 +20,7 @@ def run_game(config):
 
     clock = pygame.time.Clock()
     running = True
+    game_over = False
     while running:
         mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
@@ -28,20 +30,20 @@ def run_game(config):
                 if event.button == 1:
                     click = game.check_click(event.pos)
                     if click["status"]:
-                        game.move(click["coordinates"])
-
+                        game_over = game.move(click["coordinates"])
+                        
+        if game_mode == GameMode.AI:
+            if game.computer_move():
+                game_over = True
+            
 
         screen.fill(BACKGROUND_COLOR)
         game.check_hover(mouse_pos)
         game.draw_board(screen)
         game.draw_last_move(screen)
+        if game_over:
+            game.draw_game_over(screen)
         pygame.display.flip()
-        # print("UNesite potez")
-        # line = input()
-        # alphabetic_coordinate = line[0]
-        # numeric_coordinate = int(line[1:])
-        # i,j = game.inverse_convert_coordinates(alphabetic_coordinate,numeric_coordinate)
-        # game.move((i,j))
         clock.tick(60)
 
     pygame.quit()
